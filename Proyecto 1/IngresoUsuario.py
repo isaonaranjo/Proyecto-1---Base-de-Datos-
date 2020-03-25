@@ -11,12 +11,12 @@ import psycopg2
 def main_account_screen():
 
     global main_screen
-    main_screen = Tk()   # create a GUI window
-    main_screen.geometry("2000x1500") #set the configuration of GUI window
-    main_screen.title("Login") # set the title of GUI window
+    main_screen = Tk()   # Crea ventana GUI 
+    main_screen.geometry("2000x1500") #Configuaracion de ventana
+    main_screen.title("Login") # Titulo de ventana: login
     main_screen.configure(background = 'pink')
 
-    ## CREAR IMAGEN
+    ## CREAR IMAGEN 
     load = Image.open("Logo.jpg")
     foto = ImageTk.PhotoImage(load)
     label = Label(main_screen, image = foto)
@@ -25,10 +25,10 @@ def main_account_screen():
     # create a Form label
     Label(text="Login Or Register", bg="white", width="160", height="2", fg='white',font=("Calibri", 13)).place(y=260)
 
-    # create Login Button
+    # Boton de login
     Button(text="Login", height="4", width="60",highlightbackground='magenta', fg='black',command = login).place(x=460, y=400)
 
-    # create a register button
+    # Boton de registrado
     Button(text="Register", bg='black', height="4", width="60", fg= 'black',highlightbackground='magenta', command = register).place(x=460,y=600)
 
     main_screen.mainloop() # start the GUI
@@ -53,25 +53,25 @@ def register():
     label2.place(x=90, y =0)
 
 
-    # Set text variables
+    # variables de usuario
     username = StringVar()
     password = StringVar()
 
-    # Set label for user's instruction
+    # label con instrucciones
     Label(register_screen, text="Please enter details below", bg="blue", fg='white',width="160", height="2").place(x=5,y=260)
 
-    # Set username label
-    username_lable3 = Label(register_screen, text="Username * ")
+    #  label para crear nombre de usuario
+    username_lable3 = Label(register_screen, text="Usuario * ")
     username_lable3.place(x=675,y=320)
 
     # Set username entry
-    # The Entry widget is a standard Tkinter widget used to enter or display a single line of text.
+    # El widget de 'Entry' usado para ingresar o desplegar una linea de texto
 
     username_entry = Entry(register_screen, textvariable=username)
     username_entry.place(x=635,y=345)
 
-    # Set password label
-    password_lable4 = Label(register_screen, text="Password * ")
+    # label para crear contraseña
+    password_lable4 = Label(register_screen, text="Contraseña * ")
     password_lable4.place(x=675,y=385)
 
     # Set password entry
@@ -80,20 +80,20 @@ def register():
 
 
 
-    # Set register button
-    Button(register_screen, text="Register", width=10, height=2, bg="blue", command =register_user).place(x=675,y=470)
+    # boton de registro
+    Button(register_screen, text="Registrarse", width=10, height=2, bg="blue", command =register_user).place(x=675,y=470)
 
 
 def register_user():
 
-    # get username and password
+    # get usuario y contraseña
     username_info = username.get()
     password_info = password.get()
 
     # Open file in write mode
     file = open(username_info, "w")
 
-    # write username and password information into file
+    # escribir usuario y contraseña info al archivo
     file.write(username_info + "\n")
     file.write(password_info)
     file.close()
@@ -101,10 +101,10 @@ def register_user():
     username_entry.delete(0, END)
     password_entry.delete(0, END)
 
-    # set a label for showing success information on screen
-    Label(register_screen, text="Registration Success", fg="white",bg='black', font=("calibri", 11)).place(x=675,y=600)
+    # label de acceptacion
+    Label(register_screen, text="Registración exitosa", fg="white",bg='black', font=("calibri", 11)).place(x=675,y=600)
 
-# define login function
+# funcion de ingreso
 def login():
     global login_screen
     login_screen = Toplevel(main_screen)
@@ -142,11 +142,11 @@ def login_verification():
     print("working...")
 
 def login_verify():
-    #get username and password
+    #get usuario y contraseña
 
     username1 = username_verify.get()
     password1 = password_verify.get()
-    # this will delete the entry after login button is pressed
+    # Esto borra la entry cuando se apacha el boton de login
     username_login_entry.delete(0, END)
     password__login_entry.delete(0, END)
 
@@ -171,7 +171,7 @@ def login_sucess():
     global cursor
     login_success_screen = Toplevel(login_screen)
 
-    ## Connecion a base de datos
+    ## conexcion a base de datos
     try:
         connection = psycopg2.connect(user = "postgres",
                                       password = "Delvalle2018",
@@ -180,7 +180,7 @@ def login_sucess():
                                       database = "proyecto")
 
         cursor = connection.cursor()
-        # Print PostgreSQL Connection properties
+        # Print PostgreSQL Connection propiedades
         print ( connection.get_dsn_parameters(),"\n")
 
         # Print PostgreSQL version
@@ -189,7 +189,7 @@ def login_sucess():
         print("You are connected to - ", record,"\n")
 
 
-        #Background Color
+        #color de fondo
         login_success_screen.title('Bases de Datos')
         login_success_screen.configure(background = 'black')
         login_success_screen.geometry("2000x1500")
