@@ -39,10 +39,10 @@ def main_account_screen():
     global connection
     try:
         connection = psycopg2.connect(user = "postgres",
-                                      password = "Pancho14",
+                                      password = "Delvalle2018",
                                       host = "localhost",
-                                      port = "5432",
-                                      database = "Proyecto2")
+                                      port = "5433",
+                                      database = "proyecto")
 
         cursor = connection.cursor()
         # Print PostgreSQL Connection properties
