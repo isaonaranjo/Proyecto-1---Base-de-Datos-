@@ -290,7 +290,7 @@ def mongoloco():
     cal1.place(x=600, y= 330)
 
     bottonclick = Button(mongo_screen, text='Seleccionar fecha',command = calval1)
-    bottonclick.place(x=650, y=500)
+    bottonclick.place(x=650, y=600)
 
 
 
