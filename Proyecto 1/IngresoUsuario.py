@@ -849,7 +849,7 @@ def reportes():
     records1=Label(reportes_screen, text=variabls, fg = 'white', bg='black')
     records1.pack(anchor= 'nw')
     #CSV primer reporte
-    Button(reportes_screen, text="Generar CSV de reporte 1", command=generate_CVS1).place(x=1150, y=600)
+    Button(reportes_screen, text="Generar CSV de reporte 1", command=generate_CVS1).place(x=1150, y=575)
 
 #Segundo reporte
     Label2 =Label(reportes_screen,text="Géneros con más canciones")
@@ -869,7 +869,7 @@ def reportes():
     records2=Label(reportes_screen, text=adios, fg = 'white', bg='black')
     records2.pack(anchor= 'nw')
     ##CSV REporte2
-    Button(reportes_screen, text="Generar CSV de reporte 2", command=generate_CVS2).place(x=1150, y=625)
+    Button(reportes_screen, text="Generar CSV de reporte 2", command=generate_CVS2).place(x=1150, y=600)
 
 #REporte 3
     Label3 = Label(reportes_screen,text="Total de duración de cada playlist")
@@ -889,7 +889,7 @@ def reportes():
     records3=Label(reportes_screen, text=what, fg = 'white', bg='black')
     records3.pack(anchor= 'nw')
     #CSV reporte 3
-    Button(reportes_screen, text="Generar CSV de reporte 3", command=generate_CVS3).place(x=1150, y=650)
+    Button(reportes_screen, text="Generar CSV de reporte 3", command=generate_CVS3).place(x=1150, y=625)
 
 #Reporte 4
     Label4 = Label(reportes_screen,text="Canciones de mayor duración con la información de sus artistas")
@@ -910,7 +910,7 @@ def reportes():
     records4.pack(anchor= 'nw')
 
     #CSV reporte 4
-    Button(reportes_screen, text="Generar CSV de reporte 4", command=generate_CVS4).place(x=1150, y=675)
+    Button(reportes_screen, text="Generar CSV de reporte 4", command=generate_CVS4).place(x=1150, y=650)
 
 
 #Reporte 5
@@ -933,7 +933,7 @@ def reportes():
     records5=Label(reportes_screen, text=coso, fg = 'white', bg='black')
     records5.place(x=550, y=25)
     #CSV reporte 5
-    Button(reportes_screen, text="Generar CSV de reporte 5", command=generate_CVS5).place(x=1150, y=700)
+    Button(reportes_screen, text="Generar CSV de reporte 5", command=generate_CVS5).place(x=1150, y=675)
 
 #Reporte 6
     Label6 = Label(reportes_screen,text="Promedio de duración de canciones por género")
@@ -953,7 +953,7 @@ def reportes():
     records6=Label(reportes_screen, text=ask, fg = 'white', bg='black')
     records6.place(x= 550, y=320)
     #CSV Reporte 6
-    Button(reportes_screen, text="Generar CSV de reporte 6", command=generate_CVS6).place(x=1150, y=725)
+    Button(reportes_screen, text="Generar CSV de reporte 6", command=generate_CVS6).place(x=1150, y=700)
 
 #Reporte 7
     Label7 = Label(reportes_screen,text="Cantidad de artistas diferentes por playlist")
@@ -973,7 +973,7 @@ def reportes():
     records7=Label(reportes_screen, text=loco, fg = 'white', bg='black')
     records7.place(x=1150, y=25)
 
-    Button(reportes_screen, text="Generar CSV de reporte 7", command=generate_CVS7).place(x=1150, y=750)
+    Button(reportes_screen, text="Generar CSV de reporte 7", command=generate_CVS7).place(x=1150, y=725)
 
 
 #Reporte 8
@@ -994,7 +994,10 @@ def reportes():
     records8=Label(reportes_screen, text=palabra, fg = 'white', bg='black')
     records8.place(x=1150, y=425)
     #CSV reporte 8
-    Button(reportes_screen, text="Generar CSV de reporte 8", command=generate_CVS8).place(x=1150, y=775)
+    Button(reportes_screen, text="Generar CSV de reporte 8", command=generate_CVS8).place(x=1150, y=750)
+
+    #Boton amplicaion de reporteria fechas
+    Button(reportes_screen, text="Amplicación de reporteria", command=ampliacion_reporteria).place(x=1150, y=550)
 
 def ampliacion_reporteria():
     global ampliacion_reportes_screen
@@ -1005,7 +1008,7 @@ def ampliacion_reporteria():
 
     ## @TODO Hay que preguntar al usuario que fechas quiere ingresar##
     ## 1er reporte
-    Label1 = Label(reportes_screen,text="1. Total de ventas por semana")
+    Label1 = Label(ampliacion_reportes_screen,text="1. Total de ventas por semana")
     Label1.pack(anchor= 'nw')
     querry9 = "@@TODO"
     postgreSQL_select_Query = querry9
@@ -1020,7 +1023,7 @@ def ampliacion_reporteria():
         print(type(record))
 
     print(hola)
-    records1=Label(reportes_screen, text=hola, fg = 'white', bg='black')
+    records1=Label(ampliacion_reportes_screen, text=hola, fg = 'white', bg='black')
     records1.pack(anchor= 'nw')
 
     Button(ampliacion_reportes_screen, text="Generar CSV de reporte 1", command=generate_CVS1).place(x=1150, y=600)
