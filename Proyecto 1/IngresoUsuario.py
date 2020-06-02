@@ -1,6 +1,6 @@
 ## https://www.simplifiedpython.net/python-gui-login/ codigo de referencia
 ## Estuardo Ureta
-## Isabel Ortiz Naranjo 
+## Isabel Ortiz Naranjo
 from tkinter import *
 from PIL import Image, ImageTk
 import psycopg2
@@ -10,6 +10,12 @@ import csv
 import pymongo
 from pymongo import MongoClient
 from tkcalendar import *
+import itertools
+from random import randint
+from statistics import mean
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+## codigo para el login tomado de https://www.simplifiedpython.net/python-gui-login/
 
 def main_account_screen():
 
@@ -39,10 +45,10 @@ def main_account_screen():
     global connection
     try:
         connection = psycopg2.connect(user = "postgres",
-                                      password = "Delvalle2018",
+                                      password = "Pancho14",
                                       host = "localhost",
-                                      port = "5433",
-                                      database = "proyecto")
+                                      port = "5432",
+                                      database = "Prueba")
 
         cursor = connection.cursor()
         # Print PostgreSQL Connection properties
@@ -248,12 +254,339 @@ def login_sucess():
     Buttonactivar = Button(login_success_screen,text="Activar o inactivar una cancion",width="30", height="1", command= activar).place(x=5,y=615)
     Bottonmongo = Button(login_success_screen, text= "Mongodb",width="30", height="1", command = mongoloco).place(x=5,y=640)
     Bottondebitacora = Button(login_success_screen, text= "Bitacora",width="30", height="1", command = debitacora).place(x=5,y=665)
+    Bottondesimulaciones = Button(login_success_screen, text= "Simulaciones",width="30", height="1", command = simulaciones).place(x=5,y=665)
+    BotonCompra = Button(login_success_screen,text = "Compra", width ='30', height = '1', command = compras).place(x=5,y=690)
 
-#Bitacora implementada
+#Compras
+def compras():
+    global compras_screen
+    compras_screen = Toplevel(login_screen)
+    compras_screen.title("Compras")
+    compras_screen.geometry("2000x1500")
+    compras_screen.configure(background = 'black')
+
+    foto2 = PhotoImage(file = "header.png")
+    label2 = Label(compras_screen, image = foto2)
+
+    label2.image =foto2
+    label2.place(x=90, y =0)
+
+    global entry2
+    entry2 = Entry(compras_screen)
+    entry2.place(x=250, y= 260)
+
+    button1 = Button(compras_screen, text="Search", command = buscarmus)
+    button1.place(x =250, y= 290)
+    global var3
+    var3 = IntVar()
+
+    Radiobutton(compras_screen, text="Buscar por el artista", variable=var3, value=1,fg='navy', bg='black').place(x=5, y=260)
+    Radiobutton(compras_screen, text="Buscar por el nombre de la cancion", variable=var3, value=2,fg='navy' , bg='black').place(x=5, y=280)
+
+    BottonCarrito = Button(compras_screen,text='Agregar a carrito', command = add_cart).place(x=1200,y=670)
+    BottonCheckout =Button(compras_screen,text= "Ir a checkout", command = checkout).place(x=1200,y=700)
+
+def checkout():
+    global checkout_screen
+    global treecheck
+    checkout_screen = Toplevel(login_screen)
+    checkout_screen.title("Compras")
+    checkout_screen.geometry("2000x1500")
+    checkout_screen.configure(background = 'black')
+
+    foto2 = PhotoImage(file = "header.png")
+    label2 = Label(checkout_screen, image = foto2)
+    label2.image =foto2
+    label2.place(x=90, y =0)
+
+    treecheck = ttk.Treeview(checkout_screen, selectmode ='browse')
+    treecheck["columns"]=("Track", 'Artist','Precio','Usuario')
+
+    treecheck.column("#0", width = 0)
+    treecheck.column("Track", width = 300)
+    treecheck.heading("Track",text="Track" )
+    treecheck.column("Artist", width = 300)
+    treecheck.heading("Artist",text="Artist")
+    treecheck.column("Precio", width = 300)
+    treecheck.heading("Precio",text="Precio")
+    treecheck.column("Usuario", width = 300)
+    treecheck.heading("Usuario",text="Usuario")
+
+    querrycarro = "Select * from carrito"
+    postgreSQL_select_Query = querrycarro
+    cursor.execute(postgreSQL_select_Query)
+    records = cursor.fetchall()
+    totalcompra = 0
+    for record in records:
+        treecheck.insert("", END, text="", values=(record[0],record[1],record[2],record[3]))
+        subtotal = float(record[2])
+        print(str(subtotal))
+        totalcompra = totalcompra + subtotal
+
+
+    print(str(totalcompra))
+
+    treecheck.place(x=100, y = 300)
+
+
+    treecheck.bind('<<TreeviewSelect>>',delete_selected)
+
+    label_total = Label(checkout_screen,text= "Total de compra:"+str(totalcompra)+"").place(x=800,y=550)
+
+    buttonborrar = Button(checkout_screen, text = "Borrar el track seleccionado", command = borrarlo).place(x=1100,y=600)
+
+    buttoncompras = Button(checkout_screen,text= "Seguir con la compra", command = continuacion_compra).place(x=1100, y=630)
+
+    botonrefresh = Button(checkout_screen, text = "Refresh Screen", command = refresh).place(x=1100,y=660)
+
+def continuacion_compra():
+
+    def grouper(iterable, n):
+        args = [iter(iterable)] * n
+        return itertools.zip_longest(*args)
+
+    def export_to_pdf(data):
+        c = canvas.Canvas("recibo-compra.pdf", pagesize=A4)
+        c.drawImage("header.PNG", 120, 700,width=350, height=100)
+        c.line(50, 680, 530, 680)
+        c.drawString(50, 640, "DETALLE DE COMPRA")
+        c.drawString(50, 625, "Cliente: "+usuario+"")
+        w, h = A4
+        max_rows_per_page = 45
+        # Margin.
+        x_offset = 50
+        y_offset = 225
+        # Space between rows.
+        padding = 15
+
+        xlist = [x + x_offset for x in [0, 150, 300, 400, 480,]]
+        ylist = [h - y_offset - i*padding for i in range(max_rows_per_page + 1)]
+
+        for rows in grouper(data, max_rows_per_page):
+            rows = tuple(filter(bool, rows))
+            c.grid(xlist, ylist[:len(rows) + 1])
+            for y, row in zip(ylist[:-1], rows):
+                for x, cell in zip(xlist, row):
+                    c.drawString(x + 2, y - padding + 3, str(cell))
+            c.showPage()
+
+        c.save()
+    data = [("Cancion", "Artista", "Precio", "Estado")]
+
+    querrycarro = "Select * from carrito"
+    postgreSQL_select_Query = querrycarro
+    cursor.execute(postgreSQL_select_Query)
+    records = cursor.fetchall()
+
+    for record in records:
+        artistak = record[1]
+        trackk = record[0]
+        preciok=record[2]
+        state= "Vendida"
+        data.append((trackk, artistak,preciok, state))
+
+    export_to_pdf(data)
+
+
+
+def refresh():
+    checkout_screen.destroy()
+    checkout()
+
+
+def delete_selected(event):
+    global seleccionado
+    global preciocancion2
+    global nombrecancion2
+    global nombreartista2
+    totalcompra = 0
+    seleccionado = treecheck.selection()
+    for i in seleccionado:
+        nombreartista2 = treecheck.item(i)['values'][1]
+        nombrecancion2= treecheck.item(i)['values'][0]
+        preciocancion2 = treecheck.item(i)['values'][2]
+
+def borrarlo():
+    querrydelete = "DELETE FROM carrito WHERE track = '"+nombrecancion2+"'"
+    print(querrydelete)
+    cursor.execute(querrydelete)
+    connection.commit()
+    print(cursor.rowcount,"record deleted")
+    if cursor.rowcount >= 1:
+        borradocarrito()
+
+
+def borradocarrito():
+    global borrado_screen
+    borrado_screen = Toplevel(login_screen)
+    borrado_screen.title("Success")
+    borrado_screen.geometry("150x100")
+    Label(borrado_screen, text="Se borro ").pack()
+    Button(borrado_screen, text="OK", command=delete_carrito).pack()
+
+
+
+
+def buscarmus():
+    global compras_screen
+    global treebus
+    select = var3.get()
+    x1 = entry2.get()
+    x2 = 'artist.name, track.name, track.unitprice'
+    whereclause = ''
+    if select == 1:
+        selection = 'track INNER JOIN album ON track.albumid = album.albumid INNER JOIN artist ON album.artistid = artist.artistid'
+        whereclause = "artist.name='"+x1+"'"
+        querry= "select " +x2+" from "+selection+" WHERE "+whereclause+"AND track.activated = 1"
+        querry =str(querry)
+        print(querry)
+        postgreSQL_select_Query = querry
+        cursor.execute(postgreSQL_select_Query)
+        records = cursor.fetchall()
+        treebus = ttk.Treeview(compras_screen, selectmode ='browse')
+        treebus["columns"]=("Artist Name", 'Track Name','Precio')
+        treebus.column("#0", width = 0)
+        treebus.column("Artist Name", width = 300)
+        treebus.heading("Artist Name",text="Artist Name" )
+        treebus.column("Track Name", width = 300)
+        treebus.heading("Track Name", text = 'Track Name')
+        treebus.column('Precio',width =100)
+        treebus.heading('Precio',text= 'Precio')
+        for record in records:
+            treebus.insert("", END, text="", values=(record[0],record[1],record[2]))
+
+        treebus.place(x=500, y = 300)
+
+        treebus.bind('<<TreeviewSelect>>',callback)
+
+    if select == 2:
+        selection = 'track INNER JOIN album ON track.albumid = album.albumid INNER JOIN artist ON album.artistid = artist.artistid'
+        whereclause = "track.name='"+x1+ "'"
+        x2= 'artist.name, track.name, track.unitprice'
+        querry= "select " +x2+" from "+selection+" WHERE "+whereclause+"AND track.activated = 1 LIMIT 10"
+        querry =str(querry)
+        print(querry)
+        postgreSQL_select_Query = querry
+        cursor.execute(postgreSQL_select_Query)
+        records = cursor.fetchall()
+        treebus = ttk.Treeview(compras_screen, selectmode ='browse')
+        treebus["columns"]=("Artist Name", 'Track Name','Precio')
+        treebus.column("#0", width = 0)
+        treebus.column("Artist Name", width = 300)
+        treebus.heading("Artist Name",text="Artist Name" )
+        treebus.column("Track Name", width = 300)
+        treebus.heading("Track Name", text = 'Track Name')
+        treebus.column('Precio',width =100)
+        treebus.heading('Precio',text= 'Precio')
+
+        for record in records:
+            treebus.insert("", END, text="", values=(record[0],record[1],record[2]))
+
+        treebus.place(x=500, y = 300)
+
+        treebus.bind('<<TreeviewSelect>>',callback)
+
+
+def callback(event):
+    global selected
+    global preciocancion
+    global nombrecancion
+    global nombreartista
+
+    selected = treebus.selection()
+    for i in selected:
+        nombreartista = treebus.item(i)['values'][0]
+        nombrecancion= treebus.item(i)['values'][1]
+        preciocancion = treebus.item(i)['values'][2]
+        print(nombrecancion)
+
+def add_cart():##insert en carrito
+    querrycarrito = "insert into carrito(track,artist,precio,usuario) values ('"+nombrecancion+"','"+nombreartista+"',"+preciocancion+",'"+usuario+"')"
+    print(querrycarrito)
+    cursor.execute(querrycarrito)
+    connection.commit()
+    print(cursor.rowcount,"record inserted")
+    if cursor.rowcount >= 1:
+        agregadocarrito()
+
+def agregadocarrito():
+    global agregado_screen
+    agregado_screen = Toplevel(login_screen)
+    agregado_screen.title("Success")
+    agregado_screen.geometry("150x100")
+    Label(agregado_screen, text="Se agrego ").pack()
+    Button(agregado_screen, text="OK", command=delete_compras).pack()
+
+
+def simulaciones():
+    global simulacion_screen
+    global cal1
+    simulacion_screen = Toplevel(login_screen)
+    simulacion_screen.title("Simulacion")
+    simulacion_screen.geometry("2000x1500")
+    simulacion_screen.configure(background = 'black')
+
+    foto2 = PhotoImage(file = "header.png")
+    label2 = Label(simulacion_screen, image = foto2)
+    label2.image =foto2
+    label2.place(x=90, y =0)
+
+
+    label3 =Label(simulacion_screen,text='Ingrese la fecha que para la que desea ver las compras:')
+    label3.place(x=550,y=270)
+
+    style = ttk.Style(simulacion_screen)
+    style.theme_use('clam')
+    cal1 = Calendar(simulacion_screen,selectmode='day',background="black", disabledbackground="black", bordercolor="black",
+                    headersbackground="black", normalbackground="black", foreground='white',
+                    normalforeground='white', headersforeground='white')
+    cal1.config(background = 'black')
+    cal1.place(x=600, y= 300)
+
+    bottonclick = Button(simulacion_screen, text='Seleccionar fecha',command = calval1)
+    bottonclick.place(x=650, y=465)
+
+def calval1():
+    fecha_sel = cal1.get_date()
+
+    ## hacer algo con esta fecha buscar ventas o generar idk
+    Label(simulacion_screen, text="Reproducciones").place(x=180,y=470)
+    Label(simulacion_screen, text="Ventas").place(x=1150,y=470)
+
+    tree = ttk.Treeview(simulacion_screen, selectmode ='browse')
+    tree["columns"]=("Fecha", 'CustomerID','SongID','Cantidad de Rep')
+    tree.column("#0", width = 0)
+    tree.column("Fecha", width = 80)
+    tree.heading("Fecha",text="Fecha" )
+    tree.column("CustomerID", width = 80)
+    tree.heading("CustomerID",text="CustomerID" )
+    tree.column("SongID", width = 80)
+    tree.heading("SongID",text="SongID" )
+    tree.column("Cantidad de Rep", width = 80)
+    tree.heading("Cantidad de Rep",text="Cantidad de Rep" )
+
+    tree2 = ttk.Treeview(simulacion_screen, selectmode ='browse')
+    tree2["columns"]=("Fecha", 'CustomerID','Cantidad de Ventas','Total de Ventas')
+    tree2.column("#0", width = 0)
+    tree2.column("Fecha", width = 80)
+    tree2.heading("Fecha",text="Fecha" )
+    tree2.column("CustomerID", width = 80)
+    tree2.heading("CustomerID",text="CustomerID" )
+    tree2.column("Cantidad de Ventas", width = 120)
+    tree2.heading("Cantidad de Ventas",text="Cantidad de Ventas" )
+    tree2.column("Total de Ventas", width = 120)
+    tree2.heading("Total de Ventas",text="Total de Ventas" )
+
+    ## Insertar valores  a el tree de alguna manera aqui
+
+    tree.place(x=65, y=500)
+    tree2.place(x=1000,y=500)
+
+
 
 def debitacora():
     bitacora_screen = Toplevel(login_screen)
-    bitacora_screen.title("Bitacota")
+    bitacora_screen.title("Bitacora")
     bitacora_screen.geometry("2000x1500")
     bitacora_screen.configure(background = 'black')
 
@@ -261,6 +594,58 @@ def debitacora():
     label2 = Label(bitacora_screen, image = foto2)
     label2.image =foto2
     label2.place(x=90, y =0)
+
+
+    querrybit = "SELECT * FROM bitacora"
+    postgreSQL_select_Query = querrybit
+    cursor.execute(postgreSQL_select_Query)
+    records = cursor.fetchall()
+
+    tree = ttk.Treeview(bitacora_screen, selectmode ='browse')
+    tree["columns"]=("Username","Fecha","Tipo",'Accion','NombreActual','NombreViejo','GenreOriginal','GenreNuevo','DuracionVieja','DuracionActual','PrecioAntes','PrecioActual','AlbumIDActual','AlbumIDViejo')
+    tree.column("#0", width = 0)
+    tree.column("Username", width = 60)
+    tree.heading("Username",text="Username" )
+    tree.heading("Fecha", text="Fecha")
+    tree.column("Fecha", width = 90)
+    tree.heading("Tipo", text="Tipo")
+    tree.column("Tipo", width = 60)
+    tree.heading("Accion", text="Accion")
+    tree.column("Accion", width = 80)
+    tree.heading("NombreActual", text="NombreActual")
+    tree.column("NombreActual", width = 100)
+    tree.heading('NombreViejo', text='NombreViejo')
+    tree.column("NombreViejo", width = 100)
+    tree.heading('GenreOriginal', text='GenreOriginal')
+    tree.column("GenreOriginal", width = 100)
+    tree.heading('GenreNuevo', text='GenreNuevo')
+    tree.column('GenreNuevo', width = 100)
+    tree.heading('DuracionVieja', text='DuracionVieja')
+    tree.column('DuracionVieja', width = 100)
+    tree.heading('DuracionActual', text='DuracionActual')
+    tree.column('DuracionActual', width = 100)
+    tree.heading('PrecioAntes', text='PrecioAntes')
+    tree.column('PrecioAntes', width = 100)
+    tree.heading('PrecioActual', text='PrecioActual')
+    tree.column('PrecioActual', width = 100)
+    tree.heading('AlbumIDActual', text='AlbumIDActual')
+    tree.column('AlbumIDActual', width = 100)
+    tree.heading('AlbumIDViejo', text='AlbumIDViejo')
+    tree.column('AlbumIDViejo', width = 100)
+
+
+
+
+
+    for record in records:
+        date = str(record[1])
+        print(record)
+        tree.insert("", END, text="", values=(record[0],date,record[2],record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11],record[12],record[12],record[13]))
+
+
+
+    ##labelbit =Label(bitacora_screen,text=b + "").place(x=500,y=300)
+    tree.place(x=65, y=270)
 
 
 #Connexion con MongoDB
@@ -288,23 +673,24 @@ def mongoloco():
                     normalforeground='white', headersforeground='white')
     cal1.config(background = 'black')
     cal1.place(x=600, y= 330)
-
+    #bbotton que direcciona a la db de ventas
     bottonclick = Button(mongo_screen, text='Seleccionar fecha',command = calval1)
     bottonclick.place(x=650, y=600)
 
 
 
-def calval1():
-    fecha_sel = cal1.get_date()
-    labelFecha = Label(mongo_screen,text= "La fecha seleccionada es: "+ fecha_sel)
-    labelFecha.place(x=600 ,y=535)
+#def calval1():
+ #   fecha_sel = cal1.get_date()
+  #  labelFecha = Label(mongo_screen,text= "La fecha seleccionada es: "+ fecha_sel)
+   # labelFecha.place(x=600 ,y=535)
 
     ##intercambiable
-    client = MongoClient('localhost', 27017)
-    print(client)
-    labelMongo = Label(mongo_screen, text=client).place(x=450,y=570)
-    db = client['proyecto2']
-    ventas = db['ventas']
+    #client = MongoClient('localhost', 27017)
+    #print(client)
+    #labelMongo = Label(mongo_screen, text=client).place(x=450,y=570)
+    #db = client['proyecto2']
+    #ventas = db['ventas']
+
 
 def agregarcancion():
     agregar_screen = Toplevel(login_screen)
@@ -822,6 +1208,9 @@ def desactivacion():
             Label(desactivacion_screen, text="No se encontro una cancion con este nombre").pack()
             Button(desactivacion_screen, text="OK", command=delete_desactivacion).pack()
 
+
+
+
 # Funcion para realizar los reportes
 def reportes():
     global reportes_screen
@@ -1151,6 +1540,12 @@ def delete_quitar():
 
 def delete_desactivacion():
     desactivacion_screen.destroy()
+
+def delete_carrito():
+    borrado_screen.destroy()
+
+def delete_compras():
+    agregado_screen.destroy()
 
 def delete_agregar():
     agregar1_screen.destroy()
