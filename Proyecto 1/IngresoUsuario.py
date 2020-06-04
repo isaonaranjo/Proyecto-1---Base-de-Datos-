@@ -1784,20 +1784,29 @@ def ampliacion_reporteria():
     ## @TODO Hay que preguntar al usuario que fechas quiere ingresar##
     ## 1er reporte
     Label1 = Label(ampliacion_reportes_screen,text="1. Total de ventas por semana")
-    Label1.place(x=5,y=0)
+    Label1.place(x=100,y=0)
+    #Segundo Reporte
+    Label2 = Label(ampliacion_reportes_screen,text="2. Los N artistas con las mayores ventas")
+    Label2.place(x=300,y=0)
+    #Tercer Reporte
+    Label3 = Label(ampliacion_reportes_screen,text="3. Total de ventas por género ")
+    Label3.place(x=650,y=0)
+    #Cuarto Reporte
+    Label4 = Label(ampliacion_reportes_screen,text="4. Las N canciones con más reproducciones para un artista a ser ingresado por el usuario.")
+    Label4.place(x=800,y=0)
 
     style = ttk.Style(ampliacion_reportes_screen)
     style.theme_use('clam')
 
     primer_date = Label(ampliacion_reportes_screen, text = "Ingrese primera fecha").place(x=5,y=40)
     cal2 = DateEntry(ampliacion_reportes_screen,background="black", disabledbackground="black", bordercolor="black",
-                     headersbackground="black", normalbackground="black", foreground='white',normalforeground='white', headersforeground='white')
+                     headersbackground="black", normalbackground="black", foreground='navy',normalforeground='navy', headersforeground='navy')
     cal2.config(background = 'black')
     cal2.place(x=10, y= 70)
 
     segundo_date = Label(ampliacion_reportes_screen, text = "Ingrese segunda fecha").place(x=5,y=100)
     cal3 = DateEntry(ampliacion_reportes_screen,background="black", disabledbackground="black", bordercolor="black",
-                     headersbackground="black", normalbackground="black", foreground='white',normalforeground='white', headersforeground='white')
+                     headersbackground="black", normalbackground="black", foreground='navy',normalforeground='navy', headersforeground='navy')
     cal3.config(background = 'black')
     cal3.place(x=10, y= 130)
 
@@ -1810,12 +1819,23 @@ def ampliacion_reporteria():
 
 def calval2():
     fecha_select = cal2.get_date()
-
-    #cursor.execute(querry9)
-    #records = cursor.fetchall()
+    querry9="select name, sum(total) FROM ventas_por_artista WHERE invoicedate > (fecha_select) AND invoicedate < (fecha_select) GROUP BY name ORDER BY sum(total) DESC LIMIT (fecha_select)"
+    querry10="select name, sum(total) FROM ventas_por_genero WHERE invoicedate > (fecha_select) AND invoicedate < (fecha_select) GROUP BY name ORDER BY sum(total) DESC"
+    querry11="select artist.name, track.name, sum(cant_rep) FROM reprod_por_artista WHERE artist.name = (fecha_select) GROUP BY track.name LIMIT (fecha_select)"
+    postgreSQL_select_Query = querry9
+    cursor.execute(postgreSQL_select_Query)
+    records9 = cursor.fetchall()
     hola = ""
-    records1=Label(reportes_screen, text=hola, fg = 'white', bg='black')
-    records1.pack(anchor= 'nw')
+    for record in records9:
+        print(record[0],record[1])
+        numero = str(record[1])
+        palabra = palabra +record[0]+" "+numero +" artistas\n"
+        print(type(record))
+    print(hola)
+    records9=Label(reportes_screen, text=hola, fg = 'white', bg='white')
+    records9.place(x=300,y=100)
+    records9.pack(anchor= 'nw')
+
 
 
 
